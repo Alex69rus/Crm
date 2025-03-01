@@ -1,0 +1,16 @@
+@Crm.Api_HostAddress = http://localhost:5113
+
+###
+
+### Search Accounts
+POST {{host}}/graphql
+Content-Type: application/json
+
+{
+  "query": "query SearchAccounts($searchTerm: String, $skip: Int!, $take: Int!) { searchAccounts(searchTerm: $searchTerm, skip: $skip, take: $take) { items { id name balance createdAt updatedAt } totalCount } }",
+  "variables": {
+    "searchTerm": "test",
+    "skip": 0,
+    "take": 10
+  }
+}

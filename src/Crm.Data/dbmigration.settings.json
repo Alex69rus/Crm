@@ -1,0 +1,5 @@
+{
+  "ConnectionStrings": {
+    "CrmDbContext": "Host=localhost:5432;Database=crm-api;Username=postgres;Password=passw0rd"
+  }
+}

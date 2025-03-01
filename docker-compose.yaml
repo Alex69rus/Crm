@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:15.6
+    shm_size: 128mb
+    environment:
+      POSTGRES_PASSWORD: passw0rd
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  openfga-migrate:
+    image: openfga/openfga:latest
+    command: migrate
+    network_mode: "default"
+    environment:
+      OPENFGA_DATASTORE_ENGINE: postgres
+      OPENFGA_DATASTORE_URI: postgres://postgres:passw0rd@postgres:5432/openfga?sslmode=disable
+    depends_on:
+      - postgres
+
+  openfga:
+    container_name: openfga
+    image: openfga/openfga:latest
+    depends_on:
+      - openfga-migrate
+      - postgres
+    ports:
+      - "8080:8080"
+      - "8081:8081" 
+      - "3000:3000"
+    environment:
+      OPENFGA_DATASTORE_ENGINE: postgres
+      OPENFGA_DATASTORE_URI: postgres://postgres:passw0rd@postgres:5432/openfga
+
+  aspire-dashboard:
+    container_name: aspire-dashboard
+    image: mcr.microsoft.com/dotnet/aspire-dashboard:9.0
+    ports:
+      - "18888:18888"
+      - "4317:18889"
+    environment:
+      - DASHBOARD__TELEMETRYLIMITS__MAXLOGCOUNT=1000
+      - DASHBOARD__TELEMETRYLIMITS__MAXTRACECOUNT=1000
+      - DASHBOARD__TELEMETRYLIMITS__MAXMETRICSCOUNT=1000
+
+volumes:
+  postgres_data: 
