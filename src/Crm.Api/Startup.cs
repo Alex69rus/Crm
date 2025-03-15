@@ -1,4 +1,3 @@
-using Crm.Api.GraphQL.Queries;
 using Crm.Core.Modules.Accounts.Queries;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -8,6 +7,9 @@ using Serilog;
 using Crm.Data.Infrastructure;
 using Npgsql;
 using OpenTelemetry.Logs;
+using Crm.Api.Modules.Accounts;
+using Crm.Api.Infrastructure;
+using Crm.Api.Modules.Accounts.GraphQl;
 namespace Crm.Api;
 
 public class Startup(IConfiguration configuration)
@@ -26,22 +28,27 @@ public class Startup(IConfiguration configuration)
 
         // Add OpenTelemetry
         services.AddOpenTelemetry()
-            .ConfigureResource(resource => resource.AddService(serviceName: "Crm.Api"))
+            // .ConfigureResource(resource => resource.AddService(serviceName: "Crm.Api"))
             .WithTracing(tracing => tracing
                 .AddAspNetCoreInstrumentation()
                 .AddHttpClientInstrumentation()
                 .AddNpgsql()
                 .AddOtlpExporter())
             .WithMetrics(metrics => metrics.AddAspNetCoreInstrumentation())
-            .WithLogging(c=> c.AddOtlpExporter());
+            .WithLogging(c => c.AddOtlpExporter());
 
         // Add OpenAPI services
+        services.AddEndpointsApiExplorer();
         services.AddOpenApi();
 
         // Add GraphQL services
         services.AddGraphQLServer()
-            .AddQueryType(d => d.Name("Query"))
-            .AddTypeExtension<AccountQueries>();
+            // .AddQueryType<GqlQueries>()
+            .AddFiltering()
+            .AddQueryType<AccountQuery>()
+
+            // .AddAccounts()
+            ;
         // Add MediatR
         services.AddMediatR(cfg =>
             cfg.RegisterServicesFromAssembly(typeof(SearchAccounts).Assembly)
@@ -56,6 +63,8 @@ public class Startup(IConfiguration configuration)
         // Configure metrics endpoints
         app.UseMetricServer();
         app.UseHttpMetrics();
+
+        app.UseSerilogRequestLogging();
 
         // Add GraphQL endpoint
         app.UseRouting();

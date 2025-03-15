@@ -6,7 +6,8 @@
 
   <ItemGroup>
     <!-- GraphQL -->
-    <PackageReference Include="HotChocolate.AspNetCore" Version="13.9.0" />
+    <PackageReference Include="HotChocolate.AspNetCore" Version="15.0.3" />
+    <PackageReference Include="HotChocolate.Data.EntityFramework" Version="15.0.3" />
     
     <!-- OpenAPI -->
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.2" />
